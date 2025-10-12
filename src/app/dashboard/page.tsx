@@ -94,7 +94,7 @@ export default function DashboardPage() {
       const req: OrderRequest = { price: price as number, description };
       const res: OrderResponse =
         activeTab === "BUY" ? await createBuyOrder(req) : await createSellOrder(req);
-      alert(`${activeTab} order created: ${res.orderId}`);
+      alert(`₦{activeTab} order created: ₦{res.orderId}`);
       setPrice("");
       setDescription("");
       setSearchOrderId("");
@@ -119,7 +119,7 @@ export default function DashboardPage() {
         alert("You are not authorized to confirm this order");
         return;
       }
-      alert(`Order ${updatedOrder.orderId} confirmed`);
+      alert(`Order ₦{updatedOrder.orderId} confirmed`);
       setActiveOrder(null);
       fetchDashboard();
       fetchPendingOrders();
@@ -145,7 +145,7 @@ export default function DashboardPage() {
     if (!searchedOrder) return;
     try {
       const accepted = await acceptOrder(searchedOrder.orderId);
-      alert(`Order ${accepted.orderId} accepted`);
+      alert(`Order ₦{accepted.orderId} accepted`);
       setSearchedOrder(null);
       setSearchOrderId("");
       fetchDashboard();
@@ -174,7 +174,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-2 text-black font-medium">
               <FaWallet />
-              <span>${user.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
+              <span>₦{user.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
             </div>
           </div>
         )}
@@ -228,7 +228,7 @@ export default function DashboardPage() {
                     <span><strong>Status:</strong> {order.status}</span>
                   </div>
                   <div className="text-black font-medium">
-                    ${order.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    ₦{order.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </div>
                 </div>
               ))}
@@ -249,7 +249,7 @@ export default function DashboardPage() {
               <p><strong>Order ID:</strong> {activeOrder.orderId}</p>
               <p><strong>Type:</strong> {activeOrder.type}</p>
               <p><strong>Description:</strong> {activeOrder.description}</p>
-              <p><strong>Price:</strong> ${activeOrder.price}</p>
+              <p><strong>Price:</strong> ₦{activeOrder.price}</p>
               <p><strong>Status:</strong> {activeOrder.status}</p>
               <p><strong>Buyer ID:</strong> {activeOrder.buyerId}</p>
               <p><strong>Seller ID:</strong> {activeOrder.sellerId}</p>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-2 rounded ${activeTab === tab ? "bg-yellow-500 text-white" : "bg-gray-200 text-black"}`}
+                    className={`flex-1 py-2 rounded ₦{activeTab === tab ? "bg-yellow-500 text-white" : "bg-gray-200 text-black"}`}
                   >
                     {tab}
                   </button>
@@ -329,7 +329,7 @@ export default function DashboardPage() {
                       <p><strong>Order ID:</strong> {searchedOrder.orderId}</p>
                       <p><strong>Type:</strong> {searchedOrder.type}</p>
                       <p><strong>Description:</strong> {searchedOrder.description}</p>
-                      <p><strong>Price:</strong> ${searchedOrder.price}</p>
+                      <p><strong>Price:</strong> ₦{searchedOrder.price}</p>
                       <p><strong>Status:</strong> {searchedOrder.status}</p>
                       <div className="flex justify-end gap-2 mt-2">
                         <button onClick={() => {setSearchedOrder(null); setSearchOrderId("");}} className="px-4 py-2 rounded border text-black">Close</button>
