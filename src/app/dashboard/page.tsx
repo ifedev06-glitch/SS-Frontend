@@ -265,9 +265,6 @@ return (
           </div>
         </div>
       )}
-
-   // Replace the Active Order Modal section with this updated code:
-
 {/* Active Order Modal */}
 {activeOrder && (
   <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
