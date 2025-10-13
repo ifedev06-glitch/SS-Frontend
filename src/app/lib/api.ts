@@ -68,14 +68,18 @@ export async function getDashboard(): Promise<DashboardResponse> {
 }
 
 // ---------- Wallet / Deposit ----------
-export interface WalletResponseDTO {
-  userId: number;
-  balance: number;
+export interface DepositResponseDTO {
+  status: boolean;
   message: string;
+  data: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
+  };
 }
 
-export async function depositFunds(amount: number): Promise<WalletResponseDTO> {
-  const response = await apiClient.post<WalletResponseDTO>("/wallet/deposit", { amount });
+export async function depositFunds(amount: number): Promise<DepositResponseDTO> {
+  const response = await apiClient.post<DepositResponseDTO>("/deposit", { amount });
   return response.data;
 }
 
