@@ -146,5 +146,69 @@ export async function getOrderHistory(): Promise<OrderResponse[]> {
   return response.data;
 }
 
+// ---------- Recipient Interfaces ----------
+export interface CreateRecipientRequest {
+  name: string;
+  accountNumber: string;
+  bankCode: string;
+}
+
+export interface PaystackRecipient {
+  id: number;
+  recipientCode: string;
+  name: string;
+  accountNumber: string;
+  bankCode: string;
+  currency: string;
+  accountName: string; 
+  bankName: string; 
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
+}
+
+// ---------- Recipient API ----------
+export async function createRecipient(req: CreateRecipientRequest): Promise<PaystackRecipient> {
+  const response = await apiClient.post<PaystackRecipient>("/api/recipient/create", req);
+  return response.data;
+}
+
+export async function getRecipient(): Promise<PaystackRecipient> {
+  const response = await apiClient.get<PaystackRecipient>("/api/recipient/me");
+  return response.data;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// ---------- Withdrawal Interfaces ----------
+
+export interface WithdrawalRequest {
+  userId: number;
+  amount: number;
+}
+
+export interface WithdrawalResponse {
+  id: number;                
+  reference: string;         
+  status: string;            
+  amount: number;           
+  recipient: string;         
+  
+}
+
+// ---------- Withdrawal API ----------
+
+export async function withdrawFunds(req: WithdrawalRequest): Promise<WithdrawalResponse> {
+  const response = await apiClient.post<WithdrawalResponse>("/api/withdrawal", req);
+  return response.data;
+}
+
+export async function verifyTransfer(transferId: string): Promise<any> {
+  const response = await apiClient.get(`/api/withdrawal/transfers/${transferId}/verify`);
+  return response.data;
+}
+
+
 
 export default apiClient;

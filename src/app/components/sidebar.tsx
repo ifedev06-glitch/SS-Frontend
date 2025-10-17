@@ -59,9 +59,13 @@ export default function Sidebar() {
           <Link href="/history" className="flex items-center gap-3 p-2 rounded hover:bg-yellow-400 hover:text-black cursor-pointer transition-colors duration-200">
             <FaHistory /> Order History
           </Link>
-          <Link href="/profile" className="flex items-center gap-3 p-2 rounded hover:bg-yellow-400 hover:text-black cursor-pointer transition-colors duration-200">
-            <FaUser /> Profile
-          </Link>
+                <button
+          onClick={() => alert("Profile page coming soon!")}
+          className="flex items-center gap-3 p-2 rounded hover:bg-yellow-400 hover:text-black cursor-pointer transition-colors duration-200 w-full text-left"
+        >
+          <FaUser /> Profile (Coming Soon)
+        </button>
+
 
           {/* Replace Link with button for logout */}
           <button
