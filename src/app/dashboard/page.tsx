@@ -435,7 +435,7 @@ export default function DashboardPage() {
                     {searchedOrder.status === "PENDING" && (
                       <button
                         onClick={handleAcceptSearchedOrder}
-                        className="px-3 py-1 md:px-4 md:py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600"
+                        className="px-3 py-1 md:px-4 md:py-2 rounded-md bg-yellow-400 text-white hover:bg-blue-600"
                       >
                         Accept Order
                       </button>
