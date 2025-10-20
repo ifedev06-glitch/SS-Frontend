@@ -25,6 +25,8 @@ type Tab = "BUY" | "SELL" | "SEARCH";
 export default function DashboardPage() {
   const [user, setUser] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -94,7 +96,7 @@ export default function DashboardPage() {
         setIsDepositModalOpen(false);
         setTimeout(() => {
           window.location.href = res.data.authorization_url;
-        }, 100);
+        }, 500);
       } else {
         setDepositError(res?.message || "Failed to initiate deposit.");
       }
@@ -107,26 +109,29 @@ export default function DashboardPage() {
   };
 
   const handleCreateOrder = async () => {
-    if (!price || !description) return;
-    try {
-      const req: OrderRequest = { price: price as number, description };
-      const res: OrderResponse =
-        activeTab === "BUY"
-          ? await createBuyOrder(req)
-          : await createSellOrder(req);
-      alert(`${activeTab} order created: ${res.orderId}`);
-      setPrice("");
-      setDescription("");
-      setSearchOrderId("");
-      setSearchedOrder(null);
-      setIsOrderModalOpen(false);
-      fetchDashboard();
-      fetchPendingOrders();
-    } catch (err: any) {
-      console.error(err);
-      alert(err?.response?.data?.message || "Order creation failed");
-    }
-  };
+  if (!price || !description) return;
+  try {
+    const req: OrderRequest = { price: price as number, description };
+    const res: OrderResponse =
+      activeTab === "BUY"
+        ? await createBuyOrder(req)
+        : await createSellOrder(req);
+    
+    // Instead of alert, show modal with order ID
+    setCreatedOrderId(res.orderId);
+
+    setPrice("");
+    setDescription("");
+    setSearchOrderId("");
+    setSearchedOrder(null);
+    setIsOrderModalOpen(false);
+    fetchDashboard();
+    fetchPendingOrders();
+  } catch (err: any) {
+    console.error(err);
+    alert(err?.response?.data?.message || "Order creation failed");
+  }
+};
 
   const handleConfirmOrder = async (order: OrderResponse) => {
     try {
@@ -210,11 +215,11 @@ export default function DashboardPage() {
             </button>
 
            <Link
-  href="/withdrawal"
-  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-full text-center text-sm md:text-base rounded-full flex items-center justify-center"
->
-  Withdraw
-</Link>
+              href="/withdrawal"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white py-1.5 rounded-full text-center text-sm md:text-base rounded-full flex items-center justify-center"
+            >
+              Withdraw
+            </Link>
 
           </div>
 
@@ -253,48 +258,72 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Active Order Modal */}
-        {activeOrder && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded shadow w-11/12 max-w-md flex flex-col gap-4 text-black">
-              <h2 className="text-lg font-semibold">Order Details</h2>
-              <p><strong>Order ID:</strong> {activeOrder.orderId}</p>
-              <p><strong>Type:</strong> {activeOrder.type}</p>
-              <p><strong>Description:</strong> {activeOrder.description}</p>
-              <p><strong>Price:</strong> ₦{activeOrder.price}</p>
-              <p><strong>Status:</strong> {activeOrder.status}</p>
-              <p><strong>Buyer ID:</strong> {activeOrder.buyerId}</p>
-              <p><strong>Seller ID:</strong> {activeOrder.sellerId}</p>
-              
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  onClick={() => setActiveOrder(null)}
-                  className="px-3 py-1 md:px-4 md:py-2 rounded-md border text-black"
-                >
-                  Close
-                </button>
-                
-                {user?.id === activeOrder.sellerId && (
-                  <button
-                    onClick={() => handleConfirmOrder(activeOrder)}
-                    className="px-3 py-1 md:px-4 md:py-2 rounded-md bg-green-500 text-white hover:bg-green-600"
-                  >
-                    Completed by Seller
-                  </button>
-                )}
-                
-                {user?.id === activeOrder.buyerId && (
-                  <button
-                    onClick={() => handleConfirmOrder(activeOrder)}
-                    className="px-3 py-1 md:px-4 md:py-2 rounded-md bg-green-500 text-white hover:bg-green-600"
-                  >
-                    Completed by Buyer
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
+       {/* Active Order Modal */}
+{activeOrder && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
+    <div className="bg-white p-2 rounded shadow w-11/12 max-w-md text-black relative py-4">
+      
+      {/* Close Button - top right */}
+      <button
+        onClick={() => setActiveOrder(null)}
+        className="absolute top-3 right-3 text-gray-600 hover:text-black text-lg font-bold"
+      >
+        &times;
+      </button>
+
+      <h2 className="text-base font-semibold mb-3">Order Details</h2>
+
+      <div className="space-y-1 text-sm">
+        <p><strong>Order ID:</strong> {activeOrder.orderId}</p>
+        <p><strong>Type:</strong> {activeOrder.type}</p>
+        <p><strong>Description:</strong> {activeOrder.description}</p>
+        <p><strong>Price:</strong> ₦{activeOrder.price.toLocaleString()}</p>
+        <p><strong>Status:</strong> {activeOrder.status}</p>
+        <p><strong>Buyer ID:</strong> {activeOrder.buyerId}</p>
+        <p><strong>Seller ID:</strong> {activeOrder.sellerId}</p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex justify-end items-center gap-2 mt-5 text-xs flex-nowrap overflow-x-auto">
+        {/* Cancel Order (thin red border) */}
+        <button
+          onClick={() => alert("Cancel Order feature coming soon!")}
+          className="px-3 py-1 rounded-full border border-red-500 text-red-500 hover:bg-red-50 transition flex-shrink-0"
+        >
+          Cancel Order
+        </button>
+
+        {/* Report Order (thin yellow border) */}
+        <button
+          onClick={() => alert("Report Order feature coming soon!")}
+          className="px-3 py-1 rounded-full border border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition flex-shrink-0"
+        >
+          Report Order
+        </button>
+
+        {/* Completed Button (dynamic) */}
+        {user?.id === activeOrder.sellerId && (
+          <button
+            onClick={() => handleConfirmOrder(activeOrder)}
+            className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600 transition flex-shrink-0"
+          >
+            Seller Completed
+          </button>
         )}
+
+        {user?.id === activeOrder.buyerId && (
+          <button
+            onClick={() => handleConfirmOrder(activeOrder)}
+            className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600 transition flex-shrink-0"
+          >
+            Completed by Buyer
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+)}
+
 
         {/* Deposit Modal */}
         {isDepositModalOpen && (
@@ -446,6 +475,42 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
+
+
+{/* Created Order Modal */}
+{createdOrderId && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50 border rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded shadow w-11/12 max-w-sm flex flex-col gap-4 text-black">
+      <h2 className="text-lg font-semibold">Order Created</h2>
+      <p>Your order has been created successfully. 
+        Please copy the Order ID and share it with the other party.</p>
+      <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
+        <span className="break-all">{createdOrderId}</span>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(createdOrderId);
+            setCopySuccess("Copied!");
+            setTimeout(() => setCopySuccess(null), 2000);
+          }}
+          className="ml-2 text-blue-600 hover:text-blue-800"
+          aria-label="Copy Order ID"
+        >
+          {/* Use a simple copy icon, you can swap this with react-icons if you want */}
+          📋
+        </button>
+      </div>
+      {copySuccess && <p className="text-green-600">{copySuccess}</p>}
+      <button
+        onClick={() => setCreatedOrderId(null)}
+        className="self-end px-3 py-1 md:px-4 md:py-2 rounded-md border text-black"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+
       </div>
     </div>
   );
