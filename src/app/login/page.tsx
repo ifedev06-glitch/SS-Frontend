@@ -25,9 +25,7 @@ export default function LoginPage() {
       router.push("/dashboard"); // redirect on success
     } catch (err: any) {
       console.error("Login failed:", err.response?.data || err.message);
-      setTimeout(() => {
       setError("Invalid email or password");
-    }, 60000);
     } finally {
       setLoading(false);
     }
