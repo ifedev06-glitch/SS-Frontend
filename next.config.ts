@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*", // frontend path
-        destination: "https://shopsecure.onrender.com", // backend URL (use env var in production!)
+        destination: "http://localhost:8085", // backend URL (use env var in production!)
       },
     ];
   },

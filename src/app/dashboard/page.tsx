@@ -27,6 +27,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
+  const [loadingCreateOrder, setLoadingCreateOrder] = useState(false);
+
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -108,8 +110,12 @@ export default function DashboardPage() {
     }
   };
 
-  const handleCreateOrder = async () => {
+ const handleCreateOrder = async () => {
   if (!price || !description) return;
+
+  // 🆕 Added: indicate loading started
+  setLoadingCreateOrder(true);
+
   try {
     const req: OrderRequest = { price: price as number, description };
     const res: OrderResponse =
@@ -117,9 +123,10 @@ export default function DashboardPage() {
         ? await createBuyOrder(req)
         : await createSellOrder(req);
     
-    // Instead of alert, show modal with order ID
+    // Order created successfully
     setCreatedOrderId(res.orderId);
 
+    // Reset form + refresh data
     setPrice("");
     setDescription("");
     setSearchOrderId("");
@@ -130,6 +137,9 @@ export default function DashboardPage() {
   } catch (err: any) {
     console.error(err);
     alert(err?.response?.data?.message || "Order creation failed");
+  } finally {
+    // 🆕 Added: stop loading spinner
+    setLoadingCreateOrder(false);
   }
 };
 
@@ -436,13 +446,40 @@ export default function DashboardPage() {
                     onChange={e => setDescription(e.target.value)}
                     className="border p-2 rounded-md w-full text-black"
                   />
-                  <button
-                    onClick={handleCreateOrder}
-                    disabled={!price || !description}
-                    className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 disabled:opacity-50"
+                            <button
+              onClick={handleCreateOrder}
+              disabled={!price || !description || loadingCreateOrder}
+              className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loadingCreateOrder ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
                   >
-                    Create {activeTab} Order
-                  </button>
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                    ></path>
+                  </svg>
+                  Creating...
+                </>
+              ) : (
+                <>Create {activeTab} Order</>
+              )}
+            </button>
+
                 </div>
               )}
 
