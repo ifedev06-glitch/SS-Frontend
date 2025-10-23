@@ -268,22 +268,22 @@ export default function DashboardPage() {
           </div>
         )}
 
-       {/* Active Order Modal */}
+{/* Active Order Modal */}
 {activeOrder && (
   <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
-    <div className="bg-white p-2 rounded shadow w-11/12 max-w-md text-black relative py-4">
+    <div className="bg-white p-4 pt-8 pb-2 rounded-lg shadow-lg w-11/12 max-w-md text-black relative h-[80vh] overflow-y-auto flex flex-col items-center text-base">
       
       {/* Close Button - top right */}
       <button
         onClick={() => setActiveOrder(null)}
-        className="absolute top-3 right-3 text-gray-600 hover:text-black text-lg font-bold"
+        className="absolute top-3 right-3 text-gray-600 hover:text-black text-xl font-bold"
       >
         &times;
       </button>
 
-      <h2 className="text-base font-semibold mb-3">Order Details</h2>
+      <h2 className="text-lg font-semibold mb-4">Order Details</h2>
 
-      <div className="space-y-1 text-sm">
+      <div className="space-y-2 text-sm w-full px-4">
         <p><strong>Order ID:</strong> {activeOrder.orderId}</p>
         <p><strong>Type:</strong> {activeOrder.type}</p>
         <p><strong>Description:</strong> {activeOrder.description}</p>
@@ -294,45 +294,38 @@ export default function DashboardPage() {
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end items-center gap-2 mt-5 text-xs flex-nowrap overflow-x-auto">
-        {/* Cancel Order (thin red border) */}
-        <button
-          onClick={() => alert("Cancel Order feature coming soon!")}
-          className="px-3 py-1 rounded-full border border-red-500 text-red-500 hover:bg-red-50 transition flex-shrink-0"
-        >
-          Cancel Order
-        </button>
-
-        {/* Report Order (thin yellow border) */}
-        <button
-          onClick={() => alert("Report Order feature coming soon!")}
-          className="px-3 py-1 rounded-full border border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition flex-shrink-0"
-        >
-          Report Order
-        </button>
-
-        {/* Completed Button (dynamic) */}
-        {user?.id === activeOrder.sellerId && (
+      <div className="mt-6 w-full px-4 flex flex-col items-center">
+        <div className="flex justify-between gap-2 w-full">
+          {/* Cancel Order */}
           <button
-            onClick={() => handleConfirmOrder(activeOrder)}
-            className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600 transition flex-shrink-0"
+            onClick={() => alert("Cancel Order feature coming soon!")}
+            className="flex-1 px-4 py-2 rounded-full border border-red-500 text-red-500 hover:bg-red-50 transition"
           >
-            Seller Completed
+            Cancel Order
           </button>
-        )}
 
-        {user?.id === activeOrder.buyerId && (
+          {/* Report Order */}
+          <button
+            onClick={() => alert("Report Order feature coming soon!")}
+            className="flex-1 px-4 py-2 rounded-full border border-yellow-400 text-yellow-600 hover:bg-yellow-50 transition"
+          >
+            Report Order
+          </button>
+        </div>
+
+        {(user?.id === activeOrder.sellerId || user?.id === activeOrder.buyerId) && (
           <button
             onClick={() => handleConfirmOrder(activeOrder)}
-            className="px-3 py-1 rounded-full bg-green-500 text-white hover:bg-green-600 transition flex-shrink-0"
+            className="mt-4 w-full px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition"
           >
-            Completed by Buyer
+            {user?.id === activeOrder.sellerId ? "Seller Completed" : "Buyer Completed"}
           </button>
         )}
       </div>
     </div>
   </div>
 )}
+
 
 
         {/* Deposit Modal */}
@@ -523,18 +516,17 @@ export default function DashboardPage() {
         Please copy the Order ID and share it with the other party.</p>
       <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
         <span className="break-all">{createdOrderId}</span>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(createdOrderId);
-            setCopySuccess("Copied!");
-            setTimeout(() => setCopySuccess(null), 2000);
-          }}
-          className="ml-2 text-blue-600 hover:text-blue-800"
-          aria-label="Copy Order ID"
-        >
-          {/* Use a simple copy icon, you can swap this with react-icons if you want */}
-          📋
-        </button>
+            <button
+        onClick={() => {
+          navigator.clipboard.writeText(createdOrderId);
+          setCopySuccess("Copied!");
+          setTimeout(() => setCopySuccess(null), 2000);
+        }}
+        className="ml-2 px-3 py-1 text-sm text-black hover:text-black border border-black hover:border-blue-800 rounded transition-colors"
+        aria-label="Copy Order ID"
+      >
+        {copySuccess || "Copy"}
+      </button>
       </div>
       {copySuccess && <p className="text-green-600">{copySuccess}</p>}
       <button
