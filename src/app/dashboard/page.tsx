@@ -271,7 +271,7 @@ export default function DashboardPage() {
 {/* Active Order Modal */}
 {activeOrder && (
   <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
-    <div className="bg-white p-4 pt-8 pb-2 rounded-lg shadow-lg w-11/12 max-w-md text-black relative h-[80vh] overflow-y-auto flex flex-col items-center text-base">
+    <div className="bg-white p-4 mt-8 pt-16 pb-2 rounded-lg shadow-lg w-11/12 max-w-md text-black relative h-[80vh] overflow-y-auto flex flex-col items-center text-base">
       
       {/* Close Button - top right */}
       <button
