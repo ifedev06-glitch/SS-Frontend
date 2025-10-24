@@ -28,6 +28,8 @@ export default function DashboardPage() {
   const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [loadingCreateOrder, setLoadingCreateOrder] = useState(false);
+  const [isRedirectingToPaystack, setIsRedirectingToPaystack] = useState(false);
+
 
 
   const [isDepositModalOpen, setIsDepositModalOpen] = useState(false);
@@ -95,13 +97,19 @@ export default function DashboardPage() {
       console.log("Deposit Response:", res);
 
       if (res?.status && res?.data?.authorization_url) {
-        setIsDepositModalOpen(false);
-        setTimeout(() => {
-          window.location.href = res.data.authorization_url;
-        }, 500);
-      } else {
-        setDepositError(res?.message || "Failed to initiate deposit.");
-      }
+  setIsDepositModalOpen(false);
+
+  // Show redirecting screen
+  setIsRedirectingToPaystack(true);
+
+  // Wait briefly, then redirect
+  setTimeout(() => {
+    window.location.href = res.data.authorization_url;
+  }, 1500);
+} else {
+  setDepositError(res?.message || "Failed to initiate deposit.");
+}
+
     } catch (err: any) {
       console.error("Deposit Error:", err);
       setDepositError(err?.response?.data?.message || "Deposit failed. Please try again.");
@@ -369,179 +377,213 @@ export default function DashboardPage() {
         )}
 
         {/* Order Create/Search Modal */}
-        {isOrderModalOpen && (
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
-            <div className="bg-white p-6 rounded shadow w-11/12 max-w-md text-black">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Create or Search Order</h2>
-                <button
-                  onClick={() => setIsOrderModalOpen(false)}
-                  className="text-black font-bold text-xl"
-                >
-                  &times;
-                </button>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex gap-3 mb-4">
-                {(["BUY", "SELL", "SEARCH"] as Tab[]).map(tab => (
-                  <button
-                    key={tab}
-                    onClick={() => {
-                      setActiveTab(tab);
-                      setPrice("");
-                      setDescription("");
-                      setSearchOrderId("");
-                      setSearchedOrder(null);
-                    }}
-                    className={`flex-1 py-2 rounded-md ${
-                      activeTab === tab
-                        ? "bg-yellow-400 text-black"
-                        : "bg-gray-200 text-black"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
-
-              {/* Tab Content */}
-              {activeTab === "SEARCH" && (
-                <form onSubmit={handleSearchOrder} className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Enter Order ID"
-                    value={searchOrderId}
-                    onChange={e => setSearchOrderId(e.target.value)}
-                    className="flex-1 border p-2 rounded-md text-black"
-                  />
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 rounded-md"
-                  >
-                    Search
-                  </button>
-                </form>
-              )}
-
-              {(activeTab === "BUY" || activeTab === "SELL") && (
-                <div className="space-y-3 mb-4">
-                  <input
-                    type="number"
-                    min={1}
-                    placeholder="Price"
-                    value={price}
-                    onChange={e => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
-                    className="border p-2 rounded-md w-full text-black"
-                  />
-                  <textarea
-                    placeholder="Description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    className="border p-2 rounded-md w-full text-black"
-                  />
-                            <button
-              onClick={handleCreateOrder}
-              disabled={!price || !description || loadingCreateOrder}
-              className="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {loadingCreateOrder ? (
-                <>
-                  <svg
-                    className="animate-spin h-5 w-5 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
-                    ></path>
-                  </svg>
-                  Creating...
-                </>
-              ) : (
-                <>Create {activeTab} Order</>
-              )}
-            </button>
-
-                </div>
-              )}
-
-              {/* Search Order Result */}
-              {searchedOrder && (
-                <div className="border p-3 rounded-md bg-gray-50 text-black">
-                  <p><strong>Order ID:</strong> {searchedOrder.orderId}</p>
-                  <p><strong>Type:</strong> {searchedOrder.type}</p>
-                  <p><strong>Description:</strong> {searchedOrder.description}</p>
-                  <p><strong>Price:</strong> ₦{searchedOrder.price}</p>
-                  <p><strong>Status:</strong> {searchedOrder.status}</p>
-                  <div className="mt-2 flex justify-end gap-2">
-                    <button
-                      onClick={() => setSearchedOrder(null)}
-                      className="px-3 py-1 md:px-4 md:py-2 rounded-md border text-black"
-                    >
-                      Close
-                    </button>
-                    {searchedOrder.status === "PENDING" && (
-                      <button
-                        onClick={handleAcceptSearchedOrder}
-                        className="px-3 py-1 md:px-4 md:py-2 rounded-md bg-yellow-400 text-white hover:bg-blue-600"
-                      >
-                        Accept Order
-                      </button>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-
-{/* Created Order Modal */}
-{createdOrderId && (
-  <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50 border rounded-lg shadow-md">
-    <div className="bg-white p-6 rounded shadow w-11/12 max-w-sm flex flex-col gap-4 text-black">
-      <h2 className="text-lg font-semibold">Order Created</h2>
-      <p>Your order has been created successfully. 
-        Please copy the Order ID and share it with the other party.</p>
-      <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
-        <span className="break-all">{createdOrderId}</span>
-            <button
-        onClick={() => {
-          navigator.clipboard.writeText(createdOrderId);
-          setCopySuccess("Copied!");
-          setTimeout(() => setCopySuccess(null), 2000);
-        }}
-        className="ml-2 px-3 py-1 text-sm text-black hover:text-black border border-black hover:border-blue-800 rounded transition-colors"
-        aria-label="Copy Order ID"
-      >
-        {copySuccess || "Copy"}
-      </button>
+        {/* Order Create/Search Modal */}
+{isOrderModalOpen && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
+    <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md text-black">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Create or Search Order</h2>
+        <button
+          onClick={() => setIsOrderModalOpen(false)}
+          className="text-black font-bold text-xl"
+        >
+          &times;
+        </button>
       </div>
-      {copySuccess && <p className="text-green-600">{copySuccess}</p>}
-      <button
-        onClick={() => setCreatedOrderId(null)}
-        className="self-end px-3 py-1 md:px-4 md:py-2 rounded-md border text-black"
-      >
-        Close
-      </button>
+
+      {/* Tabs */}
+      <div className="flex gap-3 mb-4">
+        {(["BUY", "SELL", "SEARCH"] as Tab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => {
+              setActiveTab(tab);
+              setPrice("");
+              setDescription("");
+              setSearchOrderId("");
+              setSearchedOrder(null);
+            }}
+            className={`flex-1 py-2 rounded-md transition-colors ${
+              activeTab === tab
+                ? "bg-yellow-400 text-black shadow-md"
+                : "bg-gray-200 text-black hover:bg-gray-300"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === "SEARCH" && (
+        <form onSubmit={handleSearchOrder} className="flex gap-2 mb-4">
+          <input
+            type="text"
+            placeholder="Enter Order ID"
+            value={searchOrderId}
+            onChange={e => setSearchOrderId(e.target.value)}
+            className="flex-1 border p-2 rounded-md shadow-sm text-black focus:ring-2 focus:ring-yellow-400"
+          />
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-4 rounded-md shadow-sm hover:bg-blue-600 transition-colors"
+          >
+            Search
+          </button>
+        </form>
+      )}
+
+      {(activeTab === "BUY" || activeTab === "SELL") && (
+        <div className="space-y-3 mb-4">
+          <input
+            type="number"
+            min={1}
+            placeholder="Price"
+            value={price}
+            onChange={e => setPrice(e.target.value === "" ? "" : Number(e.target.value))}
+            className="border p-2 rounded-md w-full shadow-sm text-black focus:ring-2 focus:ring-yellow-400"
+          />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            className="border p-2 rounded-md w-full shadow-sm text-black focus:ring-2 focus:ring-yellow-400"
+          />
+          <button
+            onClick={handleCreateOrder}
+            disabled={!price || !description || loadingCreateOrder}
+            className="w-full bg-green-500 text-white py-2 rounded-md shadow-sm hover:bg-green-600 disabled:opacity-50 flex items-center justify-center gap-2 transition-colors"
+          >
+            {loadingCreateOrder ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                  ></path>
+                </svg>
+                Creating...
+              </>
+            ) : (
+              <>Create {activeTab} Order</>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* Search Order Result */}
+      {searchedOrder && (
+        <div className="border p-3 rounded-md bg-gray-50 text-black shadow-inner">
+          <p><strong>Order ID:</strong> {searchedOrder.orderId}</p>
+          <p><strong>Type:</strong> {searchedOrder.type}</p>
+          <p><strong>Description:</strong> {searchedOrder.description}</p>
+          <p><strong>Price:</strong> ₦{searchedOrder.price}</p>
+          <p><strong>Status:</strong> {searchedOrder.status}</p>
+          <div className="mt-2 flex justify-end gap-2">
+            <button
+              onClick={() => setSearchedOrder(null)}
+              className="px-3 py-1 rounded-md border text-black hover:bg-gray-200 transition-colors"
+            >
+              Close
+            </button>
+            {searchedOrder.status === "PENDING" && (
+              <button
+                onClick={handleAcceptSearchedOrder}
+                className="px-3 py-1 rounded-md bg-yellow-400 text-white hover:bg-yellow-600 transition-colors"
+              >
+                Accept Order
+              </button>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   </div>
 )}
 
 
+{/* Order Created Modal */}
+{createdOrderId && (
+  <div className="fixed inset-0 bg-gray-500 bg-opacity-30 flex justify-center items-center z-50">
+    <div className="relative bg-white p-6 rounded-lg shadow-md w-11/12 max-w-sm flex flex-col gap-4 text-black">
+      
+      {/* Close Button */}
+      <button
+        onClick={() => setCreatedOrderId(null)}
+        className="absolute top-2 right-2 text-2xl text-red-600 hover:text-red-800 focus:outline-none"
+        aria-label="Close"
+      >
+        &times;
+      </button>
+
+      <h2 className="text-lg font-semibold">Order Created</h2>
+      <p>Your order has been created successfully. Please copy the Order ID and share it with the other party.</p>
+
+      <div className="flex items-center justify-between bg-gray-100 p-3 rounded">
+        <span className="break-all">{createdOrderId}</span>
+        <button
+          onClick={() => {
+            navigator.clipboard.writeText(createdOrderId);
+            setCopySuccess("Copied!");
+            setTimeout(() => setCopySuccess(null), 2000);
+          }}
+          className="ml-2 px-3 py-1 text-sm text-black border border-black hover:border-blue-800 rounded transition-colors"
+          aria-label="Copy Order ID"
+        >
+          {copySuccess || "Copy"}
+        </button>
       </div>
+
+      {copySuccess && <p className="text-green-600">{copySuccess}</p>}
+    </div>
+  </div>
+)}
+
+      </div>
+      {/* Redirecting to Paystack Page */}
+{isRedirectingToPaystack && (
+  <div className="fixed inset-0 bg-white flex flex-col justify-center items-center z-[100] text-black">
+    <div className="flex flex-col items-center space-y-4">
+      <svg
+        className="animate-spin h-10 w-10 text-green-500"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+        ></path>
+      </svg>
+      <p className="text-lg font-medium">Redirecting you to Paystack...</p>
+      <p className="text-sm text-gray-600">Please wait, do not close this window.</p>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
